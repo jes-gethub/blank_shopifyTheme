@@ -1,0 +1,319 @@
+{% comment %}
+  Section: Hero Video (Ping-Pong) — responsive sizing + focal point
+{% endcomment %}
+
+<section id="hero-video-{{ section.id }}" class="hero-video hero-video--{{ section.id }}">
+  <style>
+    .hero-video--{{ section.id }} {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      color: {{ section.settings.text_color }};
+    }
+
+    /* Desktop sizing */
+    @media (min-width: 750px) {
+      .hero-video--{{ section.id }} {
+        {% if section.settings.desktop_height_mode == 'viewport' %}
+          min-height: 100vh;
+        {% else %}
+          min-height: {{ section.settings.desktop_custom_height }}px;
+        {% endif %}
+      }
+      .hero-video--{{ section.id }} video {
+        object-fit: {{ section.settings.desktop_object_fit }} !important; /* why: desktop-specific framing */
+      }
+    }
+
+    /* Mobile sizing */
+    @media (max-width: 749px) {
+      .hero-video--{{ section.id }} {
+        {% if section.settings.mobile_height_mode == 'viewport' %}
+          min-height: 100vh;
+        {% else %}
+          min-height: {{ section.settings.mobile_custom_height }}px;
+        {% endif %}
+      }
+      .hero-video--{{ section.id }} video {
+        object-fit: {{ section.settings.mobile_object_fit }} !important; /* why: mobile-specific framing */
+      }
+    }
+
+    .hero-video--{{ section.id }} .hero-video__media {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .hero-video--{{ section.id }} video {
+      width: 100%;
+      height: 100%;
+      position: static !important;
+      transform: none !important;
+      min-width: 0 !important;
+      min-height: 0 !important;
+      max-width: none !important;
+      max-height: none !important;
+      object-position: {{ section.settings.focal_x | default: 50 }}% {{ section.settings.focal_y | default: 50 }}% !important; /* why: keep subject centered per user choice */
+    }
+
+    {% if section.settings.mobile_show_poster %}
+    @media (max-width: 749px) {
+      .hero-video--{{ section.id }} video { display: none; }
+      .hero-video--{{ section.id }} .hero-video__poster { display: block; }
+    }
+    {% endif %}
+
+    .hero-video--{{ section.id }} .hero-video__poster {
+      position: absolute; inset: 0;
+      background: {% if section.settings.poster != blank %}url({{ section.settings.poster | image_url }}) center/cover no-repeat{% else %}#000{% endif %};
+      display: none;
+    }
+
+    .hero-video--{{ section.id }} .hero-video__overlay {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      place-items: {{ section.settings.content_position }};
+      min-height: inherit;
+      padding: clamp(16px, 3vw, 48px);
+    }
+    .hero-video--{{ section.id }} .hero-video__card {
+      background: {{ section.settings.overlay_bg | color_to_rgb | replace: 'rgb(', 'rgba(' | replace: ')', ', ' }}{{ section.settings.overlay_alpha | divided_by: 100.0 }}); {% if section.settings.transparent_overlay %}background: transparent;{% endif %}
+      border-radius: 16px;
+      padding: clamp(16px, 3vw, 32px);
+      max-width: {{ section.settings.content_max_width }}px;
+      backdrop-filter: blur(2px);
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    }
+    .hero-video--{{ section.id }} .hero-video__heading {
+      margin: 0 0 .5em 0;
+      font-size: clamp(28px, 5vw, 52px);
+      line-height: 1.1;
+      font-weight: 700;
+      color: #f9f9f9;
+    }
+    .hero-video--{{ section.id }} .hero-video__text {
+      margin: 0 0 1em 0;
+      font-size: clamp(16px, 2.2vw, 20px);
+      line-height: 1.5;
+      opacity: .95;
+    }
+    .hero-video--{{ section.id }} .hero-video__cta {
+      display: inline-block;
+      padding: 12px 20px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 700;
+      background: {{ section.settings.button_bg }};
+      color: {{ section.settings.button_text }};
+      box-shadow: 0 6px 16px rgba(0,0,0,.2);
+      transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+    }
+    .hero-video--{{ section.id }} .hero-video__cta:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(0,0,0,.25);
+      opacity: .95;
+    }
+  </style>
+
+  <div class="hero-video__media" aria-hidden="true">
+    {% if section.settings.poster != blank %}
+      <div class="hero-video__poster" role="img" aria-label="Hero background image"></div>
+    {% endif %}
+
+    {% if section.settings.video_url != blank %}
+      <video
+        id="heroVideoEl-{{ section.id }}"
+        class="hero-video__video"
+        muted
+        autoplay
+        playsinline
+        preload="metadata"
+        {% if section.settings.poster != blank %}poster="{{ section.settings.poster | image_url }}"{% endif %}
+      >
+        <source src="{{ section.settings.video_url | escape }}" type="video/mp4">
+      </video>
+    {% endif %}
+  </div>
+
+  <div class="hero-video__overlay">
+    <div class="hero-video__card">
+      {% if section.settings.heading != blank %}
+        <h2 class="hero-video__heading">{{ section.settings.heading }}</h2>
+      {% endif %}
+      {% if section.settings.subtext != blank %}
+        <div class="hero-video__text">{{ section.settings.subtext }}</div>
+      {% endif %}
+      {% if section.settings.button_label != blank and section.settings.button_link != blank %}
+        <a class="hero-video__cta" href="{{ section.settings.button_link }}" aria-label="{{ section.settings.button_label }}">
+          {{ section.settings.button_label }}
+        </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+  (function() {
+    var vid = document.getElementById('heroVideoEl-{{ section.id }}');
+    if (!vid) return;
+
+    var forwardRate = {{ section.settings.forward_rate | default: 0.5 }};
+    var reverseRate = {{ section.settings.reverse_rate | default: 0.5 }};
+    var reverseMode = false;
+
+    function supportsNegativePlayback() {
+      try {
+        var original = vid.playbackRate;
+        vid.playbackRate = -1;
+        var ok = (vid.playbackRate < 0);
+        vid.playbackRate = original;
+        return ok;
+      } catch(e) { return false; }
+    }
+    var canReverseNatively = supportsNegativePlayback();
+
+    var isInView = true;
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          isInView = entry.isIntersecting;
+          if (vid.readyState >= 2) {
+            if (isInView) { vid.play().catch(function(){}); }
+            else { vid.pause(); }
+          }
+        });
+      }, { threshold: 0.15 });
+      io.observe(document.getElementById('hero-video-{{ section.id }}'));
+    }
+
+    var stepTimer = null;
+    var stepMs = 30;
+    function startReverseStep() {
+      stopReverseStep();
+      stepTimer = setInterval(function(){
+        if (!isInView) return;
+        try {
+          var dt = reverseRate * 0.033;
+          if ((vid.currentTime - dt) <= 0.02) {
+            vid.currentTime = 0.0;
+            reverseMode = false;
+            startForward();
+            return;
+          }
+          vid.currentTime = Math.max(0, vid.currentTime - dt);
+        } catch(e) {
+          reverseMode = false;
+          startForward();
+        }
+      }, stepMs);
+    }
+    function stopReverseStep() {
+      if (stepTimer) { clearInterval(stepTimer); stepTimer = null; }
+    }
+
+    function startForward() {
+      stopReverseStep();
+      reverseMode = false;
+      vid.playbackRate = Math.max(0.1, forwardRate);
+      if (vid.paused) { vid.play().catch(function(){}); }
+    }
+
+    function startReverse() {
+      reverseMode = true;
+      if (canReverseNatively) {
+        vid.playbackRate = -Math.max(0.1, reverseRate);
+        if (vid.paused) { vid.play().catch(function(){}); }
+      } else {
+        vid.pause();
+        startReverseStep();
+      }
+    }
+
+    vid.addEventListener('ended', function(){
+      try { vid.currentTime = Math.max(0, (vid.duration || 0) - 0.05); } catch(e){}
+      startReverse();
+    });
+
+    vid.addEventListener('timeupdate', function(){
+      if (!reverseMode) return;
+      if (canReverseNatively && vid.currentTime <= 0.05) {
+        try { vid.currentTime = 0; } catch(e){}
+        startForward();
+      }
+    });
+
+    vid.addEventListener('loadedmetadata', function(){
+      startForward();
+    });
+  })();
+  </script>
+</section>
+
+{% schema %}
+{
+  "name": "Hero Video Loop",
+  "settings": [
+    { "type": "url", "id": "video_url", "label": "Video MP4 URL" },
+    { "type": "image_picker", "id": "poster", "label": "Poster image (optional)" },
+    { "type": "checkbox", "id": "mobile_show_poster", "label": "Use poster image on mobile", "default": true },
+
+    { "type": "header", "content": "Desktop sizing" },
+    { "type": "select", "id": "desktop_height_mode", "label": "Desktop section height", "default": "custom", "options": [
+      { "value": "viewport", "label": "Full screen (100vh)" },
+      { "value": "custom", "label": "Custom height (px)" }
+    ]},
+    { "type": "range", "id": "desktop_custom_height", "min": 400, "max": 1400, "step": 10, "unit": "px", "label": "Desktop custom height", "default": 700 },
+    { "type": "select", "id": "desktop_object_fit", "label": "Desktop video fit", "default": "contain", "options": [
+      { "value": "contain", "label": "Contain (show entire video)" },
+      { "value": "cover", "label": "Cover (fill, may crop)" },
+      { "value": "fill", "label": "Stretch (avoid)" }
+    ]},
+
+    { "type": "header", "content": "Mobile sizing" },
+    { "type": "select", "id": "mobile_height_mode", "label": "Mobile section height", "default": "custom", "options": [
+      { "value": "viewport", "label": "Full screen (100vh)" },
+      { "value": "custom", "label": "Custom height (px)" }
+    ]},
+    { "type": "range", "id": "mobile_custom_height", "min": 280, "max": 1000, "step": 10, "unit": "px", "label": "Mobile custom height", "default": 560 },
+    { "type": "select", "id": "mobile_object_fit", "label": "Mobile video fit", "default": "contain", "options": [
+      { "value": "contain", "label": "Contain (show entire video)" },
+      { "value": "cover", "label": "Cover (fill, may crop)" },
+      { "value": "fill", "label": "Stretch (avoid)" }
+    ]},
+
+    { "type": "header", "content": "Framing" },
+    { "type": "range", "id": "focal_x", "label": "Video focal point X (%)", "min": 0, "max": 100, "step": 1, "default": 50 },
+    { "type": "range", "id": "focal_y", "label": "Video focal point Y (%)", "min": 0, "max": 100, "step": 1, "default": 50 },
+
+    { "type": "header", "content": "Content" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Unlock Alignment with Emergenetics®" },
+    { "type": "richtext", "id": "subtext", "label": "Subtext", "default": "<p>Science-backed insights for teams that learn faster and work better—together.</p>" },
+
+    { "type": "select", "id": "content_position", "label": "Content alignment", "default": "center", "options": [
+      { "value": "start", "label": "Top / Left" },
+      { "value": "center", "label": "Center" },
+      { "value": "end", "label": "Bottom / Right" }
+    ]},
+    { "type": "range", "id": "content_max_width", "min": 280, "max": 1200, "step": 20, "unit": "px", "label": "Content max width", "default": 720 },
+    { "type": "color", "id": "text_color", "label": "Text color", "default": "#FFFFFF" },
+
+    { "type": "header", "content": "Overlay & Button" },
+    { "type": "color", "id": "overlay_bg", "label": "Overlay background color", "default": "#000000" },
+    { "type": "range", "id": "overlay_alpha", "label": "Overlay opacity (%)", "min": 0, "max": 95, "step": 5, "default": 35 },
+    { "type": "checkbox", "id": "transparent_overlay", "label": "Make overlay background transparent", "default": false },
+
+    { "type": "text", "id": "button_label", "label": "Button label", "default": "Learn more" },
+    { "type": "url", "id": "button_link", "label": "Button link" },
+    { "type": "color", "id": "button_bg", "label": "Button background", "default": "#D4AF37" },
+    { "type": "color", "id": "button_text", "label": "Button text", "default": "#0A0A0A" },
+
+    { "type": "header", "content": "Playback" },
+    { "type": "range", "id": "forward_rate", "label": "Forward speed", "min": 0.1, "max": 2.0, "step": 0.1, "default": 0.5 },
+    { "type": "range", "id": "reverse_rate", "label": "Reverse speed", "min": 0.1, "max": 2.0, "step": 0.1, "default": 0.5 }
+  ],
+  "presets": [
+    { "name": "Hero Video Loop Responsive" }
+  ]
+}
+{% endschema %}
