@@ -376,9 +376,13 @@
     // Also listen for custom cart update events
     window.addEventListener('cart:refresh', fetchCartCount);
     
-    // Shopify's native cart update event
-    if (window.Shopify && window.Shopify.onCartUpdate) {
+    // Shopify's native cart update event - chain with existing callback
+    if (window.Shopify) {
+      const existingCallback = window.Shopify.onCartUpdate;
       window.Shopify.onCartUpdate = function(cart) {
+        if (typeof existingCallback === 'function') {
+          existingCallback(cart);
+        }
         updateCartCountValue(cart.item_count);
       };
     }
@@ -417,7 +421,12 @@
 
   function fetchCartCount() {
     fetch('/cart.js')
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
       .then(cart => {
         updateCartCountValue(cart.item_count);
       })

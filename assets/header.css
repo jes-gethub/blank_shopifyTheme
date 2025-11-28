@@ -834,11 +834,28 @@
   }
 }
 
-/* Reduce motion for accessibility */
+/* Reduce motion for accessibility - target specific header elements */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  .header,
+  .header__hamburger-line,
+  .header__logo-image,
+  .header__menu-link,
+  .header__dropdown,
+  .header__nested-dropdown,
+  .header__dropdown-icon,
+  .header__dropdown-link,
+  .header__nested-link,
+  .header__action-btn,
+  .header__cart-count,
+  .header__mobile-nav,
+  .header__mobile-dropdown-icon,
+  .header__mobile-nested-icon,
+  .mobile-menu-overlay,
+  .search-popup,
+  .search-popup__content,
+  .search-popup__input,
+  .announcement-bar__link,
+  .announcement-bar__close {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
