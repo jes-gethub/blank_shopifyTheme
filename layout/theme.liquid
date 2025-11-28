@@ -7,6 +7,9 @@
   
   {{ content_for_header }}
   
+  <!-- Header Stylesheet -->
+  {{ 'header.css' | asset_url | stylesheet_tag }}
+  
   <!-- Add your custom CSS here -->
   <style>
     * {
@@ -22,6 +25,13 @@
   </style>
 </head>
 <body>
-  {{ content_for_layout }}
+  {% section 'header' %}
+  
+  <main id="main-content" role="main">
+    {{ content_for_layout }}
+  </main>
+
+  <!-- Header JavaScript -->
+  <script src="{{ 'header.js' | asset_url }}" defer></script>
 </body>
 </html>
