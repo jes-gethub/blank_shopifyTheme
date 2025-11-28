@@ -1,0 +1,494 @@
+{% comment %}
+  Header Section
+  A comprehensive, advanced header with:
+  - Announcement bar
+  - Logo with image upload or store name fallback
+  - Main navigation with dropdown support
+  - Search, account, and cart icons
+  - Mobile responsive design
+  - Sticky header functionality
+{% endcomment %}
+
+{% comment %} Announcement Bar {% endcomment %}
+{% if section.settings.show_announcement %}
+  <div 
+    class="announcement-bar{% if section.settings.announcement_dismissible %} announcement-bar--dismissible{% endif %}" 
+    id="announcement-bar"
+    style="background-color: {{ section.settings.announcement_bg_color }}; color: {{ section.settings.announcement_text_color }};"
+    role="region"
+    aria-label="{{ 'general.accessibility.announcement' | t | default: 'Announcement' }}"
+  >
+    <div class="announcement-bar__content">
+      {% if section.settings.announcement_link != blank %}
+        <a 
+          href="{{ section.settings.announcement_link }}" 
+          class="announcement-bar__link"
+          style="color: {{ section.settings.announcement_text_color }};"
+        >
+          {{ section.settings.announcement_text }}
+        </a>
+      {% else %}
+        <p class="announcement-bar__text">{{ section.settings.announcement_text }}</p>
+      {% endif %}
+    </div>
+    {% if section.settings.announcement_dismissible %}
+      <button 
+        class="announcement-bar__close" 
+        id="announcement-close"
+        aria-label="{{ 'general.accessibility.close' | t | default: 'Close announcement' }}"
+        style="color: {{ section.settings.announcement_text_color }};"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    {% endif %}
+  </div>
+{% endif %}
+
+{% comment %} Main Header {% endcomment %}
+<header 
+  class="header{% if section.settings.sticky_header %} header--sticky{% endif %} header--{{ section.settings.header_layout }}" 
+  id="main-header"
+  style="background-color: {{ section.settings.header_bg_color }}; padding-top: {{ section.settings.header_padding_top }}px; padding-bottom: {{ section.settings.header_padding_bottom }}px;"
+  role="banner"
+>
+  <div class="header__container">
+    {% comment %} Mobile Menu Toggle {% endcomment %}
+    <button 
+      class="header__mobile-toggle" 
+      id="mobile-menu-toggle"
+      aria-label="{{ 'general.accessibility.menu' | t | default: 'Open menu' }}"
+      aria-expanded="false"
+      aria-controls="mobile-nav"
+    >
+      <span class="header__hamburger">
+        <span class="header__hamburger-line"></span>
+        <span class="header__hamburger-line"></span>
+        <span class="header__hamburger-line"></span>
+      </span>
+    </button>
+
+    {% comment %} Logo {% endcomment %}
+    <div class="header__logo">
+      <a href="{{ routes.root_url }}" class="header__logo-link" aria-label="{{ shop.name }} - {{ 'general.accessibility.home' | t | default: 'Home' }}">
+        {% if section.settings.logo != blank %}
+          <img 
+            src="{{ section.settings.logo | image_url: width: section.settings.logo_width }}"
+            srcset="{{ section.settings.logo | image_url: width: section.settings.logo_width }} 1x, {{ section.settings.logo | image_url: width: section.settings.logo_width | times: 2 }} 2x"
+            alt="{{ section.settings.logo.alt | default: shop.name }}"
+            class="header__logo-image"
+            width="{{ section.settings.logo_width }}"
+            height="auto"
+            loading="eager"
+          >
+        {% else %}
+          <span class="header__logo-text" style="color: {{ section.settings.header_text_color }};">{{ shop.name }}</span>
+        {% endif %}
+      </a>
+    </div>
+
+    {% comment %} Desktop Navigation {% endcomment %}
+    <nav class="header__nav" id="main-nav" aria-label="{{ 'general.accessibility.main_navigation' | t | default: 'Main navigation' }}">
+      <ul class="header__menu" role="menubar">
+        {% for link in linklists[section.settings.menu].links %}
+          <li class="header__menu-item{% if link.links != blank %} header__menu-item--has-dropdown{% endif %}" role="none">
+            {% if link.links != blank %}
+              <button 
+                class="header__menu-link header__menu-link--dropdown"
+                style="color: {{ section.settings.header_text_color }}; font-size: {{ section.settings.menu_font_size }}px;"
+                aria-expanded="false"
+                aria-haspopup="true"
+                role="menuitem"
+              >
+                {{ link.title }}
+                <svg class="header__dropdown-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              <ul class="header__dropdown" role="menu">
+                {% for child_link in link.links %}
+                  <li class="header__dropdown-item{% if child_link.links != blank %} header__dropdown-item--has-nested{% endif %}" role="none">
+                    {% if child_link.links != blank %}
+                      <button 
+                        class="header__dropdown-link header__dropdown-link--nested"
+                        aria-expanded="false"
+                        aria-haspopup="true"
+                        role="menuitem"
+                      >
+                        {{ child_link.title }}
+                        <svg class="header__nested-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                      </button>
+                      <ul class="header__nested-dropdown" role="menu">
+                        {% for grandchild_link in child_link.links %}
+                          <li class="header__nested-item" role="none">
+                            <a href="{{ grandchild_link.url }}" class="header__nested-link" role="menuitem">
+                              {{ grandchild_link.title }}
+                            </a>
+                          </li>
+                        {% endfor %}
+                      </ul>
+                    {% else %}
+                      <a href="{{ child_link.url }}" class="header__dropdown-link" role="menuitem">
+                        {{ child_link.title }}
+                      </a>
+                    {% endif %}
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <a 
+                href="{{ link.url }}" 
+                class="header__menu-link"
+                style="color: {{ section.settings.header_text_color }}; font-size: {{ section.settings.menu_font_size }}px;"
+                role="menuitem"
+                {% if link.current %} aria-current="page"{% endif %}
+              >
+                {{ link.title }}
+              </a>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </nav>
+
+    {% comment %} Header Actions {% endcomment %}
+    <div class="header__actions">
+      {% comment %} Search {% endcomment %}
+      <button 
+        class="header__action-btn header__search-toggle" 
+        id="search-toggle"
+        aria-label="{{ 'general.search.search' | t | default: 'Search' }}"
+        aria-expanded="false"
+        aria-controls="search-popup"
+        style="color: {{ section.settings.header_text_color }};"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </button>
+
+      {% comment %} Account {% endcomment %}
+      <a 
+        href="{% if customer %}{{ routes.account_url }}{% else %}{{ routes.account_login_url }}{% endif %}" 
+        class="header__action-btn header__account"
+        aria-label="{% if customer %}{{ 'customer.account.title' | t | default: 'Account' }}{% else %}{{ 'customer.login.title' | t | default: 'Log in' }}{% endif %}"
+        style="color: {{ section.settings.header_text_color }};"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+      </a>
+
+      {% comment %} Cart {% endcomment %}
+      <a 
+        href="{{ routes.cart_url }}" 
+        class="header__action-btn header__cart"
+        id="header-cart"
+        aria-label="{{ 'cart.general.title' | t | default: 'Cart' }} ({{ cart.item_count }} {{ 'cart.general.items' | t | default: 'items' }})"
+        style="color: {{ section.settings.header_text_color }};"
+      >
+        {% if section.settings.cart_icon_style == 'bag' %}
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+        {% else %}
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="m1 1 4 4 2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+        {% endif %}
+        <span class="header__cart-count" id="cart-count" data-count="{{ cart.item_count }}">
+          {{ cart.item_count }}
+        </span>
+      </a>
+    </div>
+  </div>
+
+  {% comment %} Mobile Navigation {% endcomment %}
+  <nav 
+    class="header__mobile-nav" 
+    id="mobile-nav"
+    aria-label="{{ 'general.accessibility.mobile_navigation' | t | default: 'Mobile navigation' }}"
+    aria-hidden="true"
+  >
+    <div class="header__mobile-nav-inner">
+      <ul class="header__mobile-menu">
+        {% for link in linklists[section.settings.menu].links %}
+          <li class="header__mobile-menu-item{% if link.links != blank %} header__mobile-menu-item--has-dropdown{% endif %}">
+            {% if link.links != blank %}
+              <button 
+                class="header__mobile-menu-link header__mobile-menu-link--dropdown"
+                aria-expanded="false"
+              >
+                {{ link.title }}
+                <svg class="header__mobile-dropdown-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              <ul class="header__mobile-dropdown">
+                {% for child_link in link.links %}
+                  <li class="header__mobile-dropdown-item{% if child_link.links != blank %} header__mobile-dropdown-item--has-nested{% endif %}">
+                    {% if child_link.links != blank %}
+                      <button 
+                        class="header__mobile-dropdown-link header__mobile-dropdown-link--nested"
+                        aria-expanded="false"
+                      >
+                        {{ child_link.title }}
+                        <svg class="header__mobile-nested-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                      </button>
+                      <ul class="header__mobile-nested-dropdown">
+                        {% for grandchild_link in child_link.links %}
+                          <li class="header__mobile-nested-item">
+                            <a href="{{ grandchild_link.url }}" class="header__mobile-nested-link">
+                              {{ grandchild_link.title }}
+                            </a>
+                          </li>
+                        {% endfor %}
+                      </ul>
+                    {% else %}
+                      <a href="{{ child_link.url }}" class="header__mobile-dropdown-link">
+                        {{ child_link.title }}
+                      </a>
+                    {% endif %}
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <a href="{{ link.url }}" class="header__mobile-menu-link"{% if link.current %} aria-current="page"{% endif %}>
+                {{ link.title }}
+              </a>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </nav>
+</header>
+
+{% comment %} Search Popup {% endcomment %}
+<div class="search-popup" id="search-popup" aria-hidden="true" role="dialog" aria-modal="true" aria-label="{{ 'general.search.search' | t | default: 'Search' }}">
+  <div class="search-popup__overlay" id="search-overlay"></div>
+  <div class="search-popup__content">
+    <form action="{{ routes.search_url }}" method="get" class="search-popup__form" role="search">
+      <label for="search-input" class="visually-hidden">{{ 'general.search.search' | t | default: 'Search' }}</label>
+      <input 
+        type="search" 
+        name="q" 
+        id="search-input"
+        class="search-popup__input"
+        placeholder="{{ 'general.search.placeholder' | t | default: 'Search our store...' }}"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+      >
+      <button type="submit" class="search-popup__submit" aria-label="{{ 'general.search.submit' | t | default: 'Submit search' }}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </button>
+    </form>
+    <button class="search-popup__close" id="search-close" aria-label="{{ 'general.accessibility.close' | t | default: 'Close search' }}">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+</div>
+
+{% comment %} Mobile Menu Overlay {% endcomment %}
+<div class="mobile-menu-overlay" id="mobile-menu-overlay"></div>
+
+{% schema %}
+{
+  "name": "Header",
+  "class": "header-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Announcement Bar"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_announcement",
+      "label": "Show announcement bar",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "announcement_text",
+      "label": "Announcement text",
+      "default": "Free shipping on orders over $50!"
+    },
+    {
+      "type": "url",
+      "id": "announcement_link",
+      "label": "Announcement link"
+    },
+    {
+      "type": "color",
+      "id": "announcement_bg_color",
+      "label": "Background color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "announcement_text_color",
+      "label": "Text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "checkbox",
+      "id": "announcement_dismissible",
+      "label": "Allow customers to dismiss",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Logo"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo image"
+    },
+    {
+      "type": "range",
+      "id": "logo_width",
+      "min": 50,
+      "max": 300,
+      "step": 10,
+      "unit": "px",
+      "label": "Logo width",
+      "default": 150
+    },
+    {
+      "type": "header",
+      "content": "Navigation"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menu",
+      "default": "main-menu"
+    },
+    {
+      "type": "range",
+      "id": "menu_font_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Menu font size",
+      "default": 15
+    },
+    {
+      "type": "header",
+      "content": "Header Layout"
+    },
+    {
+      "type": "select",
+      "id": "header_layout",
+      "label": "Header layout",
+      "options": [
+        {
+          "value": "logo-left",
+          "label": "Logo left"
+        },
+        {
+          "value": "logo-center",
+          "label": "Logo center"
+        }
+      ],
+      "default": "logo-left"
+    },
+    {
+      "type": "color",
+      "id": "header_bg_color",
+      "label": "Header background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "header_text_color",
+      "label": "Header text color",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "header_padding_top",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "header_padding_bottom",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 15
+    },
+    {
+      "type": "header",
+      "content": "Sticky Header"
+    },
+    {
+      "type": "checkbox",
+      "id": "sticky_header",
+      "label": "Enable sticky header",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "sticky_bg_color",
+      "label": "Sticky header background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "checkbox",
+      "id": "sticky_reduce_logo",
+      "label": "Reduce logo size when sticky",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Cart Icon"
+    },
+    {
+      "type": "select",
+      "id": "cart_icon_style",
+      "label": "Cart icon style",
+      "options": [
+        {
+          "value": "cart",
+          "label": "Shopping cart"
+        },
+        {
+          "value": "bag",
+          "label": "Shopping bag"
+        }
+      ],
+      "default": "cart"
+    }
+  ]
+}
+{% endschema %}
