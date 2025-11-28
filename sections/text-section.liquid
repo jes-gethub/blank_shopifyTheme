@@ -1,0 +1,182 @@
+{%- comment -%}
+  Text Section
+  A flexible text section with heading, text content, alignment, and padding controls.
+{%- endcomment -%}
+
+{%- style -%}
+  .text-section-{{ section.id }} {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+    padding-left: 20px;
+    padding-right: 20px;
+    background-color: {{ section.settings.background_color }};
+  }
+
+  @media screen and (min-width: 750px) {
+    .text-section-{{ section.id }} {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+      padding-left: 40px;
+      padding-right: 40px;
+    }
+  }
+
+  .text-section-{{ section.id }} .text-section__container {
+    max-width: {{ section.settings.content_max_width }}px;
+    margin: 0 auto;
+    text-align: {{ section.settings.text_alignment }};
+  }
+
+  .text-section-{{ section.id }} .text-section__heading {
+    margin: 0 0 16px 0;
+    font-size: clamp(24px, 4vw, 40px);
+    line-height: 1.2;
+    font-weight: 700;
+    color: {{ section.settings.heading_color }};
+  }
+
+  .text-section-{{ section.id }} .text-section__content {
+    margin: 0;
+    font-size: clamp(16px, 2vw, 18px);
+    line-height: 1.6;
+    color: {{ section.settings.text_color }};
+  }
+
+  .text-section-{{ section.id }} .text-section__content p {
+    margin: 0 0 1em 0;
+  }
+
+  .text-section-{{ section.id }} .text-section__content p:last-child {
+    margin-bottom: 0;
+  }
+{%- endstyle -%}
+
+<section 
+  class="text-section-{{ section.id }}"
+  aria-labelledby="text-section-heading-{{ section.id }}"
+>
+  <div class="text-section__container">
+    {%- if section.settings.heading != blank -%}
+      <h2 id="text-section-heading-{{ section.id }}" class="text-section__heading">
+        {{ section.settings.heading | escape }}
+      </h2>
+    {%- endif -%}
+
+    {%- if section.settings.text_content != blank -%}
+      <div class="text-section__content rte">
+        {{ section.settings.text_content }}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Text Section",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Your Heading"
+    },
+    {
+      "type": "richtext",
+      "id": "text_content",
+      "label": "Text content",
+      "default": "<p>Add your text content here. You can use rich text formatting to style your content.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "content_max_width",
+      "min": 400,
+      "max": 1400,
+      "step": 50,
+      "unit": "px",
+      "label": "Content max width",
+      "default": 900
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#666666"
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "Text Section"
+    }
+  ]
+}
+{% endschema %}
