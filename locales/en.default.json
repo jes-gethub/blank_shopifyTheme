@@ -1,0 +1,58 @@
+{
+  "general": {
+    "404": {
+      "title": "Page not found",
+      "subtext": "The page you requested does not exist."
+    }
+  }
+}
+```
+
+---
+
+## Part 4: Using GitHub's Web Interface Efficiently
+
+### Quick Method: Upload Multiple Files
+
+Instead of creating files one by one, you can:
+
+1. **Create all files locally on your computer** first
+2. Go to your GitHub repository
+3. Click **"Add file"** → **"Upload files"**
+4. Drag and drop entire folders (GitHub maintains structure)
+5. Commit the changes
+
+### Even Faster: Use GitHub Desktop (Optional)
+
+1. Download **GitHub Desktop** (desktop.github.com)
+2. Clone your repository to your computer
+3. Create all files/folders locally using your file explorer
+4. Open GitHub Desktop, it will detect changes
+5. Commit and push to GitHub
+
+---
+
+## Part 5: Final Repository Structure
+
+After adding all files, your GitHub repository should look like this:
+```
+blank-shopify-theme/
+├── assets/
+│   └── .gitkeep
+├── config/
+│   ├── settings_data.json
+│   └── settings_schema.json
+├── layout/
+│   └── theme.liquid
+├── locales/
+│   └── en.default.json
+├── sections/
+│   └── .gitkeep
+├── templates/
+│   ├── 404.liquid
+│   ├── cart.json
+│   ├── collection.json
+│   ├── index.json
+│   ├── page.json
+│   └── product.json
+└── README.md
